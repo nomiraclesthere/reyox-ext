@@ -1,45 +1,89 @@
 // ==UserScript==
 // @name         Reyox
-// @namespace    https://github.com/nomiraclesthere/reyox-ext/
-// @homepage     https://github.com/nomiraclesthere/reyox-ext/
+// @namespace    https://github.com/reyohoho/reyohoho-chrome-ff-ext/
+// @homepage     https://github.com/reyohoho/reyohoho-chrome-ff-ext/
 // @version      0.6
-// @description  Open Reyox directly from kinopoisk.ru, shikimori.one, imdb.com
-// @author       reyox
+// @description  Open ReYohoho directly from kinopoisk.ru
+// @author       reyohoho
 // @match        *://*.kinopoisk.ru/*
-// @match        *://shikimori.one/animes/*
-// @match        *://*.imdb.com/title/*
-// @icon         https://github.com/nomiraclesthere/reyox-ext/raw/main/images/icon128.png
-// @downloadURL  https://raw.githubusercontent.com/nomiraclesthere/reyox-ext/main/reyox.user.js
-// @updateURL    https://raw.githubusercontent.com/nomiraclesthere/reyox-ext/main/reyox.user.js
+// @icon         https://github.com/reyohoho/reyohoho-chrome-ff-ext/raw/master/images/icon128.png
+// @downloadURL  https://raw.githubusercontent.com/reyohoho/reyohoho-chrome-ff-ext/userscript/reyohoho.user.js
+// @updateURL    https://raw.githubusercontent.com/reyohoho/reyohoho-chrome-ff-ext/userscript/reyohoho.user.js
+// @grant        GM_getResourceText
 // @grant        GM_addStyle
+// @grant        GM.xmlHttpRequest
+// @grant        GM_info
+// @resource     IMPORTED_CSS https://raw.githubusercontent.com/reyohoho/reyohoho-chrome-ff-ext/master/player.css
 // @run-at       document-end
+// @connect      reyohoho.space
 // ==/UserScript==
 
 let lastUrl = location.href;
 const playerTailId = 'watch-kinopoisk-player-tail';
-const siteUrl = 'https://nomiraclesthere.github.io/reyox/';
 const movieTypes = ['film', 'series'];
 const tailImage = `<svg width="100%" height="100%" viewBox="0 0 128 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;"><path id="Banner" d="M128,0L0,0L0,512L64,480L128,512L128,0Z" style="fill:url(#_Linear1);"/><g transform="matrix(6.57572e-17,1.0739,-1.08204,6.62559e-17,327.734,298.698)"><g><path d="M78.752,202.827L99.504,239.449L120.551,275.899L78.752,275.727L36.953,275.899L58.001,239.449L78.752,202.827Z" style="fill:url(#_Linear2);"/></g></g><defs><linearGradient id="_Linear1" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(128,512,-2048,512,0,0)"><stop offset="0" style="stop-color:rgb(00,00,00);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(00,00,00);stop-opacity:1"/></linearGradient><linearGradient id="_Linear2" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(96.5309,0,0,97.4299,30.4868,251.542)"><stop offset="0" style="stop-color:rgb(255,255,255);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(255,255,255);stop-opacity:1"/></linearGradient></defs></svg>`;
 
-function mountPlayer(url) {
-    window.open(url, '_blank');
+function mountPlayer(siteUrl) {
+    window.open(siteUrl, '_blank');
 }
 
 function mountPlayerTail(movieId) {
     const playerTile = document.createElement('div');
     playerTile.id = playerTailId;
     playerTile.innerHTML = tailImage;
-    playerTile.addEventListener('click', () => mountPlayer(siteUrl + "#" + movieId));
-    playerTile.addEventListener('mouseover', () => {
-        playerTile.style.top = '0px'
-    });
-    playerTile.addEventListener('mouseout', () => {
-        playerTile.style.top = '-32px'
-    });
-    setTimeout(() => {
-        playerTile.style.top = '-32px';
-    }, 100);
-    document.body.appendChild(playerTile);
+    try {
+        GM.xmlHttpRequest({
+            url: 'https://reyohoho.space:4437/nomiraclesthere.github.io/reyox/',
+            synchronous: true,
+            method: 'GET',
+            onload: function(r) {
+                if (r.status == 200) {
+                    playerTile.addEventListener('click', () => mountPlayer(r.responseText + "#" + movieId));
+                    playerTile.addEventListener('mouseover', () => {
+                        playerTile.style.top = '0px'
+                    });
+                    playerTile.addEventListener('mouseout', () => {
+                        playerTile.style.top = '-32px'
+                    });
+
+                    setTimeout(() => {
+                        playerTile.style.top = '-32px';
+                    }, 100);
+
+                    document.body.appendChild(playerTile);
+                } else {
+                    playerTile.addEventListener('click', () => mountPlayer("https://nomiraclesthere.github.io/reyox/#" + movieId));
+                    playerTile.addEventListener('mouseover', () => {
+                        playerTile.style.top = '0px'
+                    });
+                    playerTile.addEventListener('mouseout', () => {
+                        playerTile.style.top = '-32px'
+                    });
+
+                    setTimeout(() => {
+                        playerTile.style.top = '-32px';
+                    }, 100);
+
+                    document.body.appendChild(playerTile);
+                }
+
+            }
+        });
+    } catch (e) {
+        playerTile.addEventListener('click', () => mountPlayer("https://nomiraclesthere.github.io/reyox/#" + movieId));
+        playerTile.addEventListener('mouseover', () => {
+            playerTile.style.top = '0px'
+        });
+        playerTile.addEventListener('mouseout', () => {
+            playerTile.style.top = '-32px'
+        });
+
+        setTimeout(() => {
+            playerTile.style.top = '-32px';
+        }, 100);
+
+        document.body.appendChild(playerTile);
+    }
 }
 
 function removeElement(elementId) {
@@ -60,6 +104,7 @@ function kinopoiskPageHandler() {
     ) {
         console.error('Watch kinopoisk wrong movie data');
         removeElement(playerTailId);
+
         return;
     }
 
@@ -71,53 +116,18 @@ function kinopoiskPageHandler() {
     }
 }
 
-function shikimoriPageHandler() {
-    const pathname = window.location.pathname;
-    const regex = /^\/animes\/[a-z]*(\d+)-/;
-    const match = pathname.match(regex);
-    const animeId = match ? match[1] : null;
-
-    if (animeId) {
-        mountPlayerTail('shiki' + animeId);
-    } else {
-        removeElement(playerTailId);
-    }
-}
-
-function imdbPageHandler() {
-    const match = window.location.pathname.match(/^\/title\/(tt\d+)/);
-    const imdbId = match ? match[1] : null;
-
-    if (imdbId) {
-        mountPlayerTail('imdb=' + imdbId);
-    } else {
-        removeElement(playerTailId);
-    }
-}
-
-function pageHandler() {
-    const host = location.hostname;
-    if (host.includes('kinopoisk.ru')) {
-        kinopoiskPageHandler();
-    } else if (host.includes('shikimori.one')) {
-        shikimoriPageHandler();
-    } else if (host.includes('imdb.com')) {
-        imdbPageHandler();
-    }
-}
-
 new MutationObserver(() => {
     const url = location.href;
     if (url !== lastUrl) {
         lastUrl = url;
-        pageHandler();
+        kinopoiskPageHandler();
     }
 }).observe(document, {
     subtree: true,
     childList: true
 });
 
-window.addEventListener('load', pageHandler);
+window.addEventListener('load', kinopoiskPageHandler)
 
 if (typeof GM_addStyle === 'undefined') {
     GM_addStyle = (aCss) => {
@@ -132,9 +142,10 @@ if (typeof GM_addStyle === 'undefined') {
         }
         return null;
     };
-}
+};
 
-GM_addStyle(`#watch-kinopoisk-player-tail {
+if (typeof GM_getResourceText === 'undefined') {
+    var my_css = `#watch-kinopoisk-player-tail {
     width: 32px;
     height: 128px;
     top: -128px;
@@ -144,4 +155,9 @@ GM_addStyle(`#watch-kinopoisk-player-tail {
     position: fixed;
     z-index: 8888;
     transition: top 0.2s ease
-}`);
+}`
+    GM_addStyle(my_css)
+} else {
+    const styles = GM_getResourceText("IMPORTED_CSS");
+    GM_addStyle(styles);
+}
